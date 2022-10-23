@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { getUserFromserverBynameAndPass,ReadMenegerPassword } from "../Redax/Users/UserThank";
+import { getUserByID,ReadMenegerPassword } from "../Redax/Users/UserThank";
 import { useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter, Link, NavLink, Redirect, Route, Switch } from 'react-router-dom';
-import ShowPictures from "./ShowPictures";
 import FormPage from "./SignUp";
 import { store } from "../Redax/Reducers";
 import { isMenneger } from '../Redax/Users/UserAction';
@@ -32,7 +31,7 @@ export default withRouter(function Menneger(Props) {
     const pass = document.getElementById("pass").value;
     const Mpass = document.getElementById("Mpass").value;
 
-    const user = await getUserFromserverBynameAndPass(dispatch, name, pass);
+    const user = await getUserByID(dispatch, name, pass);
     const MennegerPass=await ReadMenegerPassword(dispatch);
     if (user && Mpass == MennegerPass) {
       dispatch(isMenneger(1));

@@ -10,12 +10,13 @@ import { useSelector } from 'react-redux';
 import { loadOneUser } from '../Redax/Users/UserAction';
 import { NewBasket } from '../Redax/Users/UserAction';
 import { withRouter } from 'react-router-dom';
+import { useEffect } from 'react';
 
-export default withRouter(function SignIn(Props) {
+export default withRouter(function AdditionalContentExample(Props) {
 
 const [modal,setModal]=useState(true);
+const [unV,setunV] = useState({})
   const dispatch=useDispatch();
-  // const M = useSelector((store) => {return store.users.isMenneger });
 
  const toggle = () => {
   setModal(!modal);
@@ -23,62 +24,34 @@ const [modal,setModal]=useState(true);
       Props.history.push("/")
   }
  
-
     return (
 
       <MDBContainer>
         {/* <MDBBtn onClick={toggle}>התחבר</MDBBtn> */}
         <MDBModal isOpen={modal} toggle={toggle}>
-          <MDBModalHeader toggle={toggle}>הכנס את תעודת הזהות שלך</MDBModalHeader>
+          <MDBModalHeader toggle={toggle}>היום קיימים</MDBModalHeader>
           <MDBModalBody>
 
             <form>
-              {/* <p className="h5 text-center mb-4">Sign in</p> */}
+              <p className="h5 text-center mb-4">{Props.match.params.cnt}</p>
               <div className="grey-text">
-                <MDBInput label="ת.ז" icon="user" group type="text" validate error="wrong"
-                  success="right"  id="id"  />
-
+               
+לקוחות בקופה שאינם מחוסנים...
               </div>
 
 
               <div className="text-center">
 </div>
-<NavLink to="sign">הירשם עכשיו</NavLink>
             </form>
           </MDBModalBody>
          
           <MDBModalFooter>
             <MDBBtn color="secondary" onClick={toggle} style={{backgroundColor:"#4b24da"}}>Close</MDBBtn>
-            <MDBBtn color="primary" onClick={() => IsMember(dispatch,setModal)} style={{backgroundColor:"#e02d9b"}}>כניסה</MDBBtn>
           </MDBModalFooter>
         </MDBModal>
       </MDBContainer>
     );
   })
+  ;
 
 
-
-
-  const IsMember = async(dispatch,setModal) => {
- debugger
-    const id = document.getElementById("id").value;
-    const user =  await getUserByID(dispatch, id);
-    
-    if (user) {
-    
-      dispatch(loadOneUser(user));
-     
-      debugger
-    //  dispatch(NewBasket(null));
-     setModal(false);
-    //  alert("ברוך הבא " +name);
-    return user;
-    }
-    else
-     {
-       alert("הנתונים שהכנסת שגויים..");
-      
-      return;
-    }
-
-};

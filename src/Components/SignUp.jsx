@@ -3,6 +3,7 @@ import { useState } from "react/cjs/react.development"
 import { BrowserRouter, Link, NavLink, Redirect, Route, Switch } from 'react-router-dom';
 import { MDBAlert } from 'mdbreact';
 import { useEffect } from "react"; 
+
 import {
   MDBContainer,
   MDBRow,
@@ -22,33 +23,50 @@ import { render } from "react-dom";
 import {store} from '../Redax/Reducers';
 
 import { MDBModal, MDBModalBody, MDBModalHeader } from 'mdbreact';
-import ShowPictures from "./ShowPictures";
-import { getUserFromserverBynameAndPass} from "../Redax/Users/UserThank";
+import { getUserByID} from "../Redax/Users/UserThank";
 import { MDBPaginationLink } from "mdb-react-ui-kit";
 import { NewBasket } from "../Redax/Users/UserAction";
 import { withRouter } from 'react-router-dom';
 import { loadOneUser } from "../Redax/Users/UserAction";
 export default withRouter(function FormPage(User){
-debugger
+ 
 const [modal,setModal]=useState(true);
   const dispatch=useDispatch();
-  const M = useSelector((store) => {return store.users.isMenneger });
   const U = useSelector((store) => { return store.users.user });
 
-  const [errors, setErrors] = useState({ userName: "שדה חובה", userPassword: "שדה חובה" });
+  const [errors, setErrors] = useState({ memberID: "שדה חובה", memberName: "שדה חובה"});
   const [user, setUser] = useState({});
+let d;
+
 
   useEffect(async () => {
     debugger
-    if(U.userPassword != "")
+    if(U.memberID != "")
     {
-      // let myUser = await getUserFromserverBynameAndPass(dispatch,(U.userName),(U.userPassword ));
-      // await setUser(myUser); 
       await setUser(U);
+      setErrors({ ...errors, memberID: "תקין!",memberName:"תקין!" });
+      var date1=new Date(U.memberBirthDate);
+      d=""+date1.getDate()+"/"+(date1.getMonth()+1)+"/"+date1.getFullYear()
+
+
     }
-   
+   if(User.match.params.id!=null)
+   {
+    let myUser = await getUserByID(dispatch,(User.match.params.id ));
+      await setUser(myUser);
+      setErrors({ ...errors, memberID: "תקין!",memberName:"תקין!" });
+    
+      var date1=new Date(myUser.memberBirthDate);
+      d=""+date1.getDate()+"/"+(date1.getMonth()+1)+"/"+date1.getFullYear()
+debugger
+   }
+  //  const [day, month, year] = d.split('/');
+
+  //  const date = `${year}-${month}-${day}`;
+   setUser({...user,memberBirthDate:d});
    
   },[])
+
  const toggle = () => {
   setModal(!modal)
   if(modal==true)
@@ -56,26 +74,26 @@ const [modal,setModal]=useState(true);
   }
   const newUser =async (dispatch) => {
     debugger
-    if(user.userName&&user.userPassword&&!(User.match.params.passUser)&&errors.userName=="תקין!"&&errors.userPassword=="תקין!"&&errors.email=="תקין!")
-   {dispatch(NewBasket(null));
-     await AddUser(dispatch, user.userName,user.userLastName, user.userPassword, user.userMail);
+    if(user.memberName&&user.memberID&&!(User.match.params.id)&&errors.memberName=="תקין!"||errors.memberName==""&&errors.memberLastName=="תקין!"||errors.memberLastName==""&&errors.memberID=="תקין!"||errors.memberID==""&&errors.memberAdress=="תקין!"||errors.memberAdress==""&&errors.memberCity=="תקין!"||errors.memberCity==""&&errors.memberBirthDate=="תקין!"||errors.memberBirthDate==""&&errors.memberTel=="תקין!"||errors.memberTel==""&&errors.memberPhone=="תקין!"||errors.memberPhone=="")
+   {
+     await AddUser(dispatch, user.memberName,user.memberLastName, user.memberID, user.memberAdress, user.memberCity, user.memberTel, user.memberPhone);
     
     dispatch(loadOneUser(user));
-alert("ברוך הבא "+ user.userName);
-    User.history.push("/Pictures");
+alert("ברוך הבא "+ user.memberName);
+    User.history.push("/");
 
    }
-   else if(User.match.params.passUser&&user.userName&&user.userPassword&&errors.userName=="תקין!"&&errors.userPassword=="תקין!"&&errors.email=="תקין!")
+   else if(User.match.params.id&&user.memberName&&user.memberID&&errors.memberName=="תקין!"||errors.memberName==""&&errors.memberLastName=="תקין!"||errors.memberLastName==""&&errors.memberID=="תקין!"||errors.memberID==""&&errors.memberAdress=="תקין!"||errors.memberAdress==""&&errors.memberCity=="תקין!"||errors.memberCity==""&&errors.memberBirthDate=="תקין!"||errors.memberBirthDate==""&&errors.memberTel=="תקין!"||errors.memberTel==""&&errors.memberPhone=="תקין!"||errors.memberPhone=="")
    {
      debugger
-    await UppdateUser(dispatch,user.codeUser, user.userName,user.userLastName, user.userPassword, user.userMail);
+    await UppdateUser(dispatch, user.memberName,user.memberLastName, user.memberID, user.memberAdress, user.memberCity, user.memberTel, user.memberPhone);
     dispatch(loadOneUser(user));
-    alert( user.userName+" "+ user.userLastName +"עודכן בהצלחה");
+    alert( user.memberName+" "+ user.memberLastName +"עודכן בהצלחה");
     User.history.push("/");
    }
-   else if(!user.userName||!user.userPassword)
+   else if(!user.memberName||!user.memberID)
    {
-    alert("שם וסיסמא הינם שדות חובה על מנת להירשם");
+    alert("שם ות.ז הינם שדות חובה על מנת להירשם");
     
   }
   else 
@@ -89,61 +107,133 @@ const validateName = (event) => {
 let pattern="^(?=[a-zA-Zא-ת1-9']{4,10}$)(?!.*[_.]{2})[^_.].*[^_.]$"
 
   if (!event.target.value)
-    setErrors({ ...errors, userName: "שדה חובה" });
+    setErrors({ ...errors, memberName: "שדה חובה" });
   else if (!event.target.value.match(pattern)) 
-    setErrors({ ...errors, userName: "אורך השם חייב להיות בין 4 ל10 תווים(אותיות ,מספרים וגרש) " });
+    setErrors({ ...errors, memberName: "אורך השם חייב להיות בין 4 ל10 תווים(אותיות ,מספרים וגרש) " });
   else {
-    setErrors({ ...errors, userName: "תקין!" }); 
-    setUser({ ...user, userName:document.getElementById("defaultFormNameEx").value})
+    setErrors({ ...errors, memberName: "תקין!" }); 
+    setUser({ ...user, memberName:document.getElementById("defaultFormNameEx").value})
     
-     //setUser({ ...user, userName: event.target.value })
+     //setUser({ ...user, memberName: event.target.value })
   }
-  setUser({ ...user, userName:document.getElementById("defaultFormNameEx").value})
+  setUser({ ...user, memberName:document.getElementById("defaultFormNameEx").value})
 }
 const validateLastName = (event) => {
   let pattern="^[-a-zA-Zא-ת']+$"
   
     if (!event.target.value)
-      setErrors({ ...errors, userLastName: "שדה חובה" });
+    setErrors({ ...errors, memberLastName: "תקין!" }); 
     else if (!event.target.value.match(pattern)) 
-      setErrors({ ...errors, userLastName: " חייב להכיל רק אותיות או גירש " });
+      setErrors({ ...errors, memberLastName: " חייב להכיל רק אותיות או גירש " });
     else {
-      setErrors({ ...errors, userLastName: "תקין!" }); 
+      setErrors({ ...errors, memberLastName: "תקין!" }); 
        }
-    setUser({ ...user, userLastName:document.getElementById("defaultFormLastNameEx").value})
+    setUser({ ...user, memberLastName:document.getElementById("defaultFormLastNameEx").value})
   
   }
 
-const validateuserPassword = (event) => {
+const validatememberID = (event) => {
 
-  var userPassword = /^[A-Za-z]\w{7,14}$/;
-  if (event.target.value.match(userPassword)) {
-    setErrors({ ...errors, userPassword: "תקין!" });
-    setUser({ ...user, userPassword: event.target.value })
+  var memberID = /^[0-9]{7,9}$/;
+  if (event.target.value.match(memberID)) {
+    setErrors({ ...errors, memberID: "תקין!" });
+    setUser({ ...user, memberID: event.target.value })
   }
   else {
-    setErrors({ ...errors, userPassword: 'סיסמא חייבת להכיל בין 7 ל-16 תווים ולהתחיל באות!!!' })
+    setErrors({ ...errors, memberID: 'ת.ז שגויה!!' })
    
   }
-  setUser({ ...user, userPassword: event.target.value })
+  setUser({ ...user, memberID: event.target.value })
 
 
 }
-const validateEmail = (event) => {
-  if (!event.target.value) {
-    setErrors({ ...errors, email: "שדה חובה!" });
+const validateAdress = (event) => {
 
-  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(event.target.value)) {
-    setErrors({ ...errors, email: "לא תקין!" });
+  var memberAdress = /^\s*\S+(?:\s+\S+)/;
+  if (event.target.value.match(memberAdress)||event.target.value=="") {
+    setErrors({ ...errors, memberAdress:  "תקין!"  });
+    setUser({ ...user, memberAdress: event.target.value })
   }
   else {
-    setErrors({ ...errors, email: "תקין!" });
-setUser({ ...user, userMail: event.target.value })
-  } 
-  setUser({ ...user, userMail: event.target.value })
+    setErrors({ ...errors, memberAdress: "לא תקין!" });
+   
+  }
+  setUser({ ...user, memberAdress: event.target.value })
+
 
 }
+
+const validatePhon = (event) => {
+  var regex = /^[0-9\-\+]{9,15}$/  ;
+  if (event.target.value.match(regex)||event.target.value=="") {
+    setUser({ ...user, memberPhone: event.target.value });
+    setErrors({ ...errors, memberPhone:  "תקין!"  });
+
+  }
+  else {
+   
+    setErrors({ ...errors, memberPhone: "לא תקין!" });
+  }
  
+  setUser({ ...user, memberPhone: event.target.value })
+
+}
+const validateBirthDate = (event) => {
+  
+  var d2 = new Date();
+     var d1= new Date(event.target.value);
+
+     if(d2.getFullYear()<d1.getFullYear() )
+     setErrors({ ...errors, memberBirthDate:"בדוק ששדה השנה תקין" });
+    else{
+     
+      if(d2.getFullYear()===d1.getFullYear() )
+      {
+        if(d2.getMonth()<d1.getMonth() )
+        setErrors({ ...errors, memberBirthDate:  "בדוק ששדה החודש תקין " });
+
+        else{
+          if(d2.getMonth()===d1.getMonth())
+          {
+
+            if(d2.getDate()<d1.getDate())
+            setErrors({ ...errors, memberBirthDate:  "בדוק ששדה היום תקין" });
+            else{  
+              setUser({ ...user, memberBirthDate: event.target.value })
+              setErrors({ ...errors, memberBirthDate:  "תקין!" });
+           
+            }
+          }
+           
+        }
+      }
+     
+
+    }    
+    
+  }
+ 
+
+  
+ 
+
+const validateTel = (event) => {
+  debugger
+  var regex =  /^0(5[^7]|[2-4]|[8-9]|7[0-9])[0-9]{7}$/
+  if (event.target.value.match(regex)||event.target.value=="") {
+  
+    setUser({ ...user, memberTel: event.target.value })
+    setErrors({ ...errors, memberTel:  "תקין!"  });
+
+  }
+  else {
+   
+    setErrors({ ...errors, memberTel: "לא תקין!" });
+  }
+ 
+  setUser({ ...user, memberTel: event.target.value })
+
+}
 
     return (
 
@@ -151,7 +241,7 @@ setUser({ ...user, userMail: event.target.value })
        
         <MDBModal isOpen={modal} toggle={toggle}>
         <MDBModalHeader toggle={toggle}>
-        {! (User.match.params.passUser) ?
+        {! (User.match.params.id) ?
                   <h3 className="my-3">
                        <MDBIcon icon="lock" />
                   הירשם:
@@ -180,11 +270,11 @@ setUser({ ...user, userMail: event.target.value })
                 id="defaultFormNameEx"
                 className="form-control"
                 required
-                 value={user.userName} 
+                 value={user.memberName} 
                 onChange={(e) => validateName(e)}
-                name="userName"
+                name="memberName"
               ></input>
-              <p > *{errors.userName}</p>
+              <p > *{errors.memberName}</p>
               <label
                 htmlFor="defaultFormEmailEx"
                 className="grey-text font-weight-light"
@@ -195,45 +285,109 @@ setUser({ ...user, userMail: event.target.value })
                 type="text"
                 id="defaultFormLastNameEx"
                 className="form-control"
-                value={user.userLastName} 
+                value={user.memberLastName} 
                 onChange={(e) => validateLastName(e)}
               ></input>
-             <p> *{errors.userLastName}</p>
+             <p> *{errors.memberLastName}</p>
               <label
                 htmlFor="defaultFormuserPasswordwordEx"
                 className="grey-text font-weight-light"
               >
-                הכנס סיסמא אישית
+הכנס מספר זהות
               </label>
               <input
-                type="password"
+                type="text"
                 id="defaultFormuserPasswordwordEx"
                 className="form-control"
                 name="userPassword"
-                 value={user.userPassword}
+                 value={user.memberID}
                 required
-                onChange={(e) => validateuserPassword(e)}
+                onChange={(e) => validatememberID(e)}
               />
-              <p>*{errors.userPassword}</p>
+              <p>*{errors.memberID}</p>
 
 
               <label
                 htmlFor="defaultFormEmailEx"
                 className="grey-text font-weight-light"
               >
-                הכנס אימייל
+                הכנס תאריך לידה
               </label>
               <input
-                type="email"
+                type="date"
                 id="defaultFormEmailEx"
                 className="form-control"
-                name="email" 
-                 value={user.userMail} 
-                onChange={(e) => validateEmail(e)}
+                value={user.memberBirthDate}
+                
+
+                onChange={(e) => validateBirthDate(e)}
+
               ></input>
-              <p > *{errors.email}</p>
+              <p > *{errors.memberBirthDate}</p>
 
 
+              <label
+                htmlFor="defaultFormEmailEx"
+                className="grey-text font-weight-light"
+              >
+                הכנס כתובת
+              </label>
+              <input
+                type="text"
+                id="defaultFormEmailEx"
+                className="form-control"
+                 value={user.memberAdress} 
+                onChange={(e) => validateAdress(e)}
+              ></input>
+              <p > *{errors.memberAdress}</p>
+
+
+              <label
+                htmlFor="defaultFormEmailEx"
+                className="grey-text font-weight-light"
+              >
+                הכנס עיר מגורים
+              </label>
+              <input
+                type="text"
+                id="defaultFormCity"
+                className="form-control"
+                 value={user.memberCity} 
+                onChange={(e) => setUser({ ...user, memberCity: e.target.value })}
+              ></input>
+              <p > *{errors.memberCity}</p>
+
+
+              <label
+                htmlFor="defaultFormEmailEx"
+                className="grey-text font-weight-light"
+              >
+                הכנס פלאפון
+              </label>
+              <input
+                type="text"
+                id="defaultFormEmailEx"
+                className="form-control"
+                 value={user.memberPhone} 
+                onChange={(e) => validatePhon(e)}
+              ></input>
+              <p > *{errors.memberPhone}</p>
+
+
+              <label
+                htmlFor="defaultFormEmailEx"
+                className="grey-text font-weight-light"
+              >
+                הכנס טלפון
+              </label>
+              <input
+                type="text"
+                id="defaultFormEmailEx"
+                className="form-control"
+                 value={user.memberTel} 
+                onChange={(e) => validateTel(e)}
+              ></input>
+              <p > *{errors.memberTel}</p>
               <div className="text-center">
 </div>
             </form>
